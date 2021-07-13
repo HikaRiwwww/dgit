@@ -1,0 +1,4 @@
+import libdgit
+
+
+libdgit.main()
