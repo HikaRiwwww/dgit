@@ -79,7 +79,7 @@ def repo_file(repo, *path, mkdir=False):
     :param mkdir:
     :return:
     """
-    if repo_dir(repo, *path, mkdir=mkdir):
+    if repo_dir(repo, *path[:-1], mkdir=mkdir):
         return repo_path(repo, *path)
 
 
@@ -118,9 +118,14 @@ def repo_create(path):
     with open(repo_file(repo, "description"), "w") as f:
         f.write("Unnamed repository; edit this file 'description' to name the repository.\n")
 
-    with open(repo_file(repo, "file"), "w") as f:
+    with open(repo_file(repo, "HEAD"), "w") as f:
+        f.write("ref: refs/heads/master\n")
+
+    with open(repo_file(repo, "config"), "w") as f:
         config = default_repo_conf()
         config.write(f)
+
+    return repo
 
 
 def repo_find(path=".", required=True):
