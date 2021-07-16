@@ -42,6 +42,14 @@ class DgitBlob(DgitObject):
         self.blobdata = data
 
 
+_obj_map = {
+    b'commit': DgitCommit,
+    b'tree': DgitTree,
+    b'tag': DgitTag,
+    b'blob': DgitBlob,
+}
+
+
 def object_find(repo, name, fmt=None, follow=True):
     """
     # todo
@@ -77,12 +85,7 @@ def object_read(repo, sha):
     if size != len(raw) - y - 1:
         raise Exception("size info does not match")
 
-    c = {
-        b'commit': DgitCommit,
-        b'tree': DgitTree,
-        b'tag': DgitTag,
-        b'blob': DgitBlob,
-    }.get(fmt)
+    c = _obj_map.get(fmt)
     return c(repo, raw[y + 1:])
 
 
@@ -103,3 +106,12 @@ def object_write(obj: DgitObject, actually_write=True):
             f.write(zlib.compress(result))
 
     return sha
+
+
+def object_hash(fd, fmt, repo=None):
+    data = fd.read()
+    c = _obj_map.get(fmt)
+    if not c:
+        raise Exception("Unknown type: {}".format(fmt))
+    obj = c(repo, data)
+    return object_write(obj, repo)
